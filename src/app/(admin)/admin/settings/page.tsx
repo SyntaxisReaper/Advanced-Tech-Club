@@ -1,10 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2, Plus, Shield } from "lucide-react";
-import { addAdminAction, removeAdminAction } from "@/app/actions/adminActions";
+import { Shield } from "lucide-react";
+import { AddAdminForm } from "@/components/admin/AddAdminForm";
+import { RemoveAdminButton } from "@/components/admin/RemoveAdminButton";
 
 export default async function AdminSettingsPage() {
     const supabase = await createClient();
@@ -39,12 +37,7 @@ export default async function AdminSettingsPage() {
                 <CardContent className="space-y-6">
                     <div className="space-y-4">
                         <h3 className="text-sm font-medium text-white">Add New Admin</h3>
-                        <form action={addAdminAction} className="flex gap-2 max-w-md">
-                            <Input name="email" type="email" placeholder="admin@example.com" required className="bg-neutral-950 border-neutral-800 text-white" />
-                            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">
-                                <Plus className="h-4 w-4 mr-2" /> Add
-                            </Button>
-                        </form>
+                        <AddAdminForm />
                     </div>
 
                     <div className="space-y-4">
@@ -56,12 +49,7 @@ export default async function AdminSettingsPage() {
                                     {SUPER_ADMINS.includes(email) ? (
                                         <span className="text-xs text-indigo-400 font-medium px-2 py-1 bg-indigo-500/10 rounded">Super Admin</span>
                                     ) : (
-                                        <form action={removeAdminAction}>
-                                            <input type="hidden" name="email" value={email} />
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-neutral-900">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </form>
+                                        <RemoveAdminButton email={email} />
                                     )}
                                 </div>
                             ))}
