@@ -1,4 +1,4 @@
-import { getEventBySlug, getEvents } from "@/services/eventService";
+import { getEventBySlug, getEvents, getEventsStatic } from "@/services/eventService";
 import { MdxRenderer } from "@/components/shared/MdxRenderer";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Clock, Share2, MessageSquare } from "lucide-react";
@@ -10,7 +10,7 @@ import { RegisterButton } from "@/components/events/RegisterButton";
 export const revalidate = 60; // Revalidate every minute
 
 export async function generateStaticParams() {
-    const events = await getEvents();
+    const events = await getEventsStatic();
     return events.map((event) => ({
         slug: event.slug,
     }));

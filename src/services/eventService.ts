@@ -1,7 +1,23 @@
 import { createClient } from "@/lib/supabase/server";
+import { createStaticClient } from "@/lib/supabase/static";
 import { Event } from "@/types/events";
 
 export type { Event }; // Re-export for convenience if needed, but better to import from types
+
+export async function getEventsStatic(): Promise<Event[]> {
+    const supabase = createStaticClient();
+    const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('is_published', true)
+        .order('date', { ascending: true });
+
+    if (error) {
+        console.error('Error fetching static events:', error);
+        return [];
+    }
+    return data || [];
+}
 
 export async function getEvents(includeDrafts = false): Promise<Event[]> {
     const supabase = await createClient();
