@@ -1,3 +1,5 @@
+"use server";
+
 import { getEventBySlug } from "@/services/eventService";
 
 export async function getEventDetails(slug: string) {
