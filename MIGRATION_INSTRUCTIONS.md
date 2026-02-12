@@ -27,8 +27,9 @@ File: `supabase/migrations/20260213_create_admins_table.sql`
 ### 5.  **Fix Registrations RLS (Previous, can skip if running next one):**
     Run the SQL in `supabase/migrations/20260213_fix_registrations_rls.sql` in the SQL Editor.
 
-6.  **Fix Admin & Registrations RLS (Comprehensive):**
-    Run the SQL in `supabase/migrations/20260213_fix_admin_rls.sql` in the SQL Editor. This fixes the issue where admins couldn't be added or seen., not just their own.
+6.  **Fix RLS Recursion (CRITICAL):**
+    Run the SQL in `supabase/migrations/20260213_fix_rls_recursion.sql` in the SQL Editor.
+    **This fixes the "infinite loop" error that was likely blocking your access.**
 
 ## Verification
 After running these scripts:
