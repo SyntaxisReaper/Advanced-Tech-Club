@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
 
 export interface Event {
     id: string;
@@ -16,7 +16,7 @@ export interface Event {
 }
 
 export async function getEvents(includeDrafts = false): Promise<Event[]> {
-    const supabase = createClient();
+    const supabase = await createClient();
     let query = supabase
         .from('events')
         .select('*')
@@ -36,7 +36,7 @@ export async function getEvents(includeDrafts = false): Promise<Event[]> {
 }
 
 export async function getEventBySlug(slug: string): Promise<Event | null> {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data, error } = await supabase
         .from('events')
         .select('*')
@@ -51,7 +51,7 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
 }
 
 export async function createEvent(event: Omit<Event, 'id' | 'created_at' | 'updated_at'>) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data, error } = await supabase
         .from('events')
         .insert([event])
@@ -63,7 +63,7 @@ export async function createEvent(event: Omit<Event, 'id' | 'created_at' | 'upda
 }
 
 export async function updateEvent(id: string, updates: Partial<Event>) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data, error } = await supabase
         .from('events')
         .update(updates)
@@ -76,7 +76,7 @@ export async function updateEvent(id: string, updates: Partial<Event>) {
 }
 
 export async function deleteEvent(id: string) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { error } = await supabase
         .from('events')
         .delete()

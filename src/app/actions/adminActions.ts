@@ -93,9 +93,9 @@ export async function updateEventAction(id: string, formData: FormData) {
             tags,
             is_published
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error updating event:", error);
-        return { error: "Failed to update event" };
+        return { error: error.message || "Failed to update event" };
     }
 
     revalidatePath("/events");
@@ -136,7 +136,7 @@ export async function removeAdminAction(formData: FormData) {
 
     // Prevent removing self if there's no other admin? 
     // Or just prevent removing the super admins from the code.
-    const SUPER_ADMINS = ["syntaxisreaper@gmail.com", "arman@example.com"];
+    const SUPER_ADMINS = ["syntaxisreaper@gmail.com"];
     if (SUPER_ADMINS.includes(email)) {
         return { error: "Cannot remove super admin" };
     }

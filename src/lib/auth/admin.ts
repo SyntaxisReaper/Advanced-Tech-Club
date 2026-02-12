@@ -5,7 +5,7 @@ export async function isAdmin(email?: string | null) {
 
     // Fallback for initial bootstrap if DB fails or empty? No, rely on DB.
     // We can keep the hardcoded list as a fallback or "super admins".
-    const SUPER_ADMINS = ["syntaxisreaper@gmail.com", "arman@example.com"];
+    const SUPER_ADMINS = ["syntaxisreaper@gmail.com"];
     if (SUPER_ADMINS.includes(email)) return true;
 
     const supabase = await createClient();

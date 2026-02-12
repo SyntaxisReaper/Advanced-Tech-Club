@@ -9,7 +9,7 @@ export default async function AdminSettingsPage() {
     const { data: admins } = await supabase.from("admins").select("*").order("created_at", { ascending: true });
 
     // Fallback for super admins if DB is empty or just to show them
-    const SUPER_ADMINS = ["syntaxisreaper@gmail.com", "arman@example.com"];
+    const SUPER_ADMINS = ["syntaxisreaper@gmail.com"];
 
     // Merge DB admins with super admins for display, removing duplicates
     const allAdminEmails = Array.from(new Set([
