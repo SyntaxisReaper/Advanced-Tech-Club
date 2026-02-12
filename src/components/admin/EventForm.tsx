@@ -26,9 +26,12 @@ export function EventForm({ event, isEdit = false }: EventFormProps) {
     async function clientAction(formData: FormData) {
         setError(null);
         startTransition(async () => {
-            const result = isEdit
-                ? await updateEventAction(event.id, formData)
-                : await createEventAction(formData);
+            let result;
+            if (isEdit && event) {
+                result = await updateEventAction(event.id, formData);
+            } else {
+                result = await createEventAction(formData);
+            }
 
             if (result?.error) {
                 setError(result.error);
