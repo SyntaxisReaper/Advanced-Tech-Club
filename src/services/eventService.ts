@@ -1,19 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
+import { Event } from "@/types/events";
 
-export interface Event {
-    id: string;
-    slug: string;
-    title: string;
-    date: string;
-    location: string;
-    description: string;
-    image: string;
-    registration_link?: string;
-    feedback_link?: string;
-    tags: string[];
-    is_published: boolean;
-    content?: string;
-}
+export type { Event }; // Re-export for convenience if needed, but better to import from types
 
 export async function getEvents(includeDrafts = false): Promise<Event[]> {
     const supabase = await createClient();

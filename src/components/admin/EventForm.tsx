@@ -12,8 +12,10 @@ import { createEventAction, updateEventAction } from "@/app/actions/adminActions
 // Ideally use `useFormState` or similar, but for simplicity we can use standard form action for now 
 // OR wrap the action.
 
+import { Event } from "@/types/events";
+
 interface EventFormProps {
-    event?: any; // Type accurately later
+    event?: Event;
     isEdit?: boolean;
 }
 
