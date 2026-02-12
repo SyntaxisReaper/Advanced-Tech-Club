@@ -1,5 +1,7 @@
 "use client";
 
+import { useTransition, useState } from "react";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -16,10 +18,24 @@ interface EventFormProps {
 }
 
 export function EventForm({ event, isEdit = false }: EventFormProps) {
-    const action = isEdit ? updateEventAction.bind(null, event.id) : createEventAction;
+    const [isPending, startTransition] = useTransition();
+    const [error, setError] = useState<string | null>(null);
+
+    async function clientAction(formData: FormData) {
+        setError(null);
+        startTransition(async () => {
+            const result = isEdit
+                ? await updateEventAction(event.id, formData)
+                : await createEventAction(formData);
+
+            if (result?.error) {
+                setError(result.error);
+            }
+        });
+    }
 
     return (
-        <form action={action} className="space-y-8 max-w-2xl bg-neutral-900 p-8 rounded-lg border border-neutral-800">
+        <form action={clientAction} className="space-y-8 max-w-2xl bg-neutral-900 p-8 rounded-lg border border-neutral-800">
             <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -80,8 +96,10 @@ export function EventForm({ event, isEdit = false }: EventFormProps) {
                 </div>
             </div>
 
-            <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
-                {isEdit ? "Update Event" : "Create Event"}
+            {error && <p className="text-sm text-red-500">{error}</p>}
+
+            <Button type="submit" disabled={isPending} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
+                {isPending ? "Saving..." : (isEdit ? "Update Event" : "Create Event")}
             </Button>
         </form>
     );
