@@ -1,12 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield } from "lucide-react";
+import { getAdmins } from "@/services/adminService";
 import { AddAdminForm } from "@/components/admin/AddAdminForm";
 import { RemoveAdminButton } from "@/components/admin/RemoveAdminButton";
 
 export default async function AdminSettingsPage() {
-    const supabase = await createClient();
-    const { data: admins } = await supabase.from("admins").select("*").order("created_at", { ascending: true });
+    const admins = await getAdmins();
 
     // Fallback for super admins if DB is empty or just to show them
     const SUPER_ADMINS = ["syntaxisreaper@gmail.com"];

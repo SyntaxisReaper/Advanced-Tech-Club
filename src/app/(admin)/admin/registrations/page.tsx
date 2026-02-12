@@ -1,4 +1,4 @@
-import { getAllRegistrations } from "@/services/userService";
+import { getAllRegistrations } from "@/services/adminService";
 import { getEvents } from "@/services/eventService";
 import {
     Table,

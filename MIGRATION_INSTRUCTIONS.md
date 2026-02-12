@@ -24,9 +24,11 @@ File: `supabase/migrations/20260213_add_user_details_to_registrations.sql`
 File: `supabase/migrations/20260213_create_admins_table.sql`
 > Creates a table to manage admin access. Defaults `syntaxisreaper@gmail.com` as admin.
 
-### 5. Fix Registrations Visibility
-File: `supabase/migrations/20260213_fix_registrations_rls.sql`
-> **Important**: Run this to allow admins to see ALL registrations, not just their own.
+### 5.  **Fix Registrations RLS (Previous, can skip if running next one):**
+    Run the SQL in `supabase/migrations/20260213_fix_registrations_rls.sql` in the SQL Editor.
+
+6.  **Fix Admin & Registrations RLS (Comprehensive):**
+    Run the SQL in `supabase/migrations/20260213_fix_admin_rls.sql` in the SQL Editor. This fixes the issue where admins couldn't be added or seen., not just their own.
 
 ## Verification
 After running these scripts:
