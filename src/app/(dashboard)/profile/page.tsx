@@ -11,8 +11,16 @@ import { getUserRegistrations, Registration } from "@/services/userService";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+
+import { checkIsAdmin } from "@/app/actions/adminActions";
+
 export default function ProfilePage() {
     const { user, loading } = useUser();
+    const [isAdminUser, setIsAdminUser] = useState(false);
+
+    useEffect(() => {
+        checkIsAdmin().then(setIsAdminUser);
+    }, []);
 
     if (loading || !user) {
         return (
@@ -26,9 +34,18 @@ export default function ProfilePage() {
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold text-white">Profile</h1>
-                <p className="text-neutral-400 mt-2">Manage your account settings and preferences.</p>
+            <div className="flex justify-between items-start">
+                <div>
+                    <h1 className="text-3xl font-bold text-white">Profile</h1>
+                    <p className="text-neutral-400 mt-2">Manage your account settings and preferences.</p>
+                </div>
+                {isAdminUser && (
+                    <Link href="/admin">
+                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                            Admin Dashboard
+                        </Button>
+                    </Link>
+                )}
             </div>
 
             <Card className="bg-neutral-900 border-neutral-800">

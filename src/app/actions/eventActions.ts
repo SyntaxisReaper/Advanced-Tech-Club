@@ -1,9 +1,7 @@
-"use server";
-
-import { getEventBySlug } from "@/lib/mdx/mdxLoader";
+import { getEventBySlug } from "@/services/eventService";
 
 export async function getEventDetails(slug: string) {
-    const event = getEventBySlug(slug);
+    const event = await getEventBySlug(slug);
     if (!event) return null;
 
     return {

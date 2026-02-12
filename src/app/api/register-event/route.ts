@@ -20,6 +20,8 @@ export async function POST(request: Request) {
         .insert({
             user_id: user.id,
             event_slug: eventSlug,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
         });
 
     if (error) {

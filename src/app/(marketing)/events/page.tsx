@@ -1,17 +1,19 @@
 import Link from "next/link";
-import { getAllEvents } from "@/lib/mdx/mdxLoader";
+import { getEvents } from "@/services/eventService";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+export const revalidate = 60; // Revalidate every minute
 
 export const metadata = {
     title: "Events - Advanced Tech Club",
     description: "Upcoming workshops, hackathons, and meetups.",
 };
 
-export default function EventsPage() {
-    const events = getAllEvents();
+export default async function EventsPage() {
+    const events = await getEvents();
 
     return (
         <div className="min-h-screen bg-neutral-950 py-12">

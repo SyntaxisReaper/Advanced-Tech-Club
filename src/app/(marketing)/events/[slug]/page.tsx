@@ -1,4 +1,4 @@
-import { getEventBySlug, getAllEvents } from "@/lib/mdx/mdxLoader";
+import { getEventBySlug, getEvents } from "@/services/eventService";
 import { MdxRenderer } from "@/components/shared/MdxRenderer";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Clock, Share2, MessageSquare } from "lucide-react";
@@ -7,8 +7,10 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { RegisterButton } from "@/components/events/RegisterButton";
 
+export const revalidate = 60; // Revalidate every minute
+
 export async function generateStaticParams() {
-    const events = getAllEvents();
+    const events = await getEvents();
     return events.map((event) => ({
         slug: event.slug,
     }));
@@ -16,7 +18,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const event = getEventBySlug(slug);
+    const event = await getEventBySlug(slug);
     if (!event) return { title: "Event Not Found" };
 
     return {
@@ -27,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function EventPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const event = getEventBySlug(slug);
+    const event = await getEventBySlug(slug);
 
     if (!event) {
         notFound();
@@ -69,7 +71,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2">
                         <div className="prose prose-invert max-w-none">
-                            <MdxRenderer source={event.content} />
+                            <MdxRenderer source={event.content || ''} />
                         </div>
                     </div>
 
@@ -91,15 +93,15 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
                                 </div>
                             </div>
 
-                            <RegisterButton eventSlug={slug} registrationLink={event.registrationLink} />
+                            <RegisterButton eventSlug={slug} registrationLink={event.registration_link} />
 
                             <Button variant="outline" className="w-full border-neutral-700 text-neutral-300 hover:bg-neutral-800 mt-3">
                                 <Share2 className="mr-2 h-4 w-4" /> Share Event
                             </Button>
 
                             {/* Show feedback button if event date is today or passed */}
-                            {event.feedbackLink && new Date() >= new Date(event.date) && (
-                                <a href={event.feedbackLink} target="_blank" rel="noopener noreferrer" className="block w-full mt-3">
+                            {event.feedback_link && new Date() >= new Date(event.date) && (
+                                <a href={event.feedback_link} target="_blank" rel="noopener noreferrer" className="block w-full mt-3">
                                     <Button variant="outline" className="w-full border-green-500/50 text-green-400 hover:bg-neutral-800">
                                         <MessageSquare className="mr-2 h-4 w-4" /> Give Feedback
                                     </Button>
