@@ -135,11 +135,18 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between mb-8">
                     <h2 className="text-2xl font-bold text-white">Your Protocol Passes</h2>
                     {user.email === "syntaxisreaper@gmail.com" && (
-                        <Link href="/admin">
-                            <Button variant="outline" className="border-indigo-500/50 text-indigo-400 hover:bg-neutral-900">
-                                Admin Dashboard
-                            </Button>
-                        </Link>
+                        <div className="flex gap-4">
+                            <Link href="/admin/scanner">
+                                <Button className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-bold shadow-lg shadow-emerald-900/20 border border-emerald-500/20">
+                                    <Zap className="mr-2 h-4 w-4" /> Scan Passes
+                                </Button>
+                            </Link>
+                            <Link href="/admin">
+                                <Button variant="outline" className="border-indigo-500/50 text-indigo-400 hover:bg-neutral-900">
+                                    Admin Dashboard
+                                </Button>
+                            </Link>
+                        </div>
                     )}
                 </div>
 

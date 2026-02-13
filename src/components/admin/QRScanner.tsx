@@ -1,9 +1,9 @@
 "use client";
 
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { Html5QrcodeScanner, Html5Qrcode } from "html5-qrcode";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { checkInUser } from "@/app/actions/gamificationActions";
-import { Loader2, CheckCircle2, XCircle, Zap } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Zap, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function QRScanner() {
@@ -15,16 +15,45 @@ export function QRScanner() {
     } | null>(null);
 
     const [isPending, startTransition] = useTransition();
+    const [permissionGranted, setPermissionGranted] = useState(false);
     const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
+    // Initial permission check and setup
     useEffect(() => {
-        // Initialize Scanner
+        // Check if camera permission is already granted
+        Html5Qrcode.getCameras().then(devices => {
+            if (devices && devices.length) {
+                // Devices found, permission likely granted or queryable
+                // We don't auto-start to avoid jarring UX, user clicks start
+            }
+        }).catch(err => {
+            console.log("Permissions not granted yet", err);
+        });
+
+        return () => {
+            if (scannerRef.current) {
+                try {
+                    scannerRef.current.clear();
+                } catch (e) {
+                    console.error("Error clearing scanner", e);
+                }
+            }
+        };
+    }, []);
+
+    const startScanning = () => {
+        setPermissionGranted(true);
         // Use a slight timeout to ensure DOM is ready
-        const timeoutId = setTimeout(() => {
+        setTimeout(() => {
             if (!scannerRef.current) {
                 const scanner = new Html5QrcodeScanner(
                     "reader",
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    {
+                        fps: 10,
+                        qrbox: { width: 250, height: 250 },
+                        aspectRatio: 1.0,
+                        showTorchButtonIfSupported: true
+                    },
                     /* verbose= */ false
                 );
 
@@ -32,35 +61,21 @@ export function QRScanner() {
                 scannerRef.current = scanner;
             }
         }, 100);
-
-        return () => {
-            clearTimeout(timeoutId);
-            if (scannerRef.current) {
-                scannerRef.current.clear().catch(error => {
-                    console.error("Failed to clear html5-qrcode scanner. ", error);
-                });
-            }
-        };
-    }, []);
+    };
 
     function onScanSuccess(decodedText: string) {
         if (isPending || scanResult?.success) return; // Debounce
 
-        // Pause scanning effectively by ignoring results or clearing
-        // For better UX, we just ignore new scans while processing
-
         startTransition(async () => {
             try {
-                // Determine if decodedText is a UUID (ticket secret)
-                // Simple check: length
                 if (decodedText.length < 10) return;
 
                 const result = await checkInUser(decodedText);
                 setScanResult(result);
 
-                // If success, maybe pause scanner for a bit?
-                if (result.success) {
-                    // Scanner continues running, but we show overlay
+                // Stop scanning on success to show result clearly
+                if (result.success && scannerRef.current) {
+                    scannerRef.current.pause(true);
                 }
 
             } catch (error) {
@@ -71,21 +86,34 @@ export function QRScanner() {
     }
 
     function onScanFailure(error: any) {
-        // handle scan failure, usually better to ignore and keep scanning.
-        // console.warn(`Code scan error = ${error}`);
+        // handle scan failure
     }
 
     const resetScan = () => {
         setScanResult(null);
+        if (scannerRef.current) {
+            scannerRef.current.resume();
+        }
     };
 
     return (
         <div className="max-w-md mx-auto my-8 space-y-6">
-            <div className="relative overflow-hidden rounded-xl border border-neutral-800 bg-black">
-                {!scanResult ? (
-                    <div id="reader" className="w-full" />
+            <div className="relative overflow-hidden rounded-xl border border-neutral-800 bg-black min-h-[350px] flex flex-col justify-center">
+                {!permissionGranted ? (
+                    <div className="text-center p-8">
+                        <div className="bg-neutral-900 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-6">
+                            <Camera className="w-10 h-10 text-indigo-500" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-2">Camera Access Required</h3>
+                        <p className="text-neutral-400 mb-6">Please allow camera access to scan Protocol Passes.</p>
+                        <Button onClick={startScanning} className="bg-indigo-600 hover:bg-indigo-700 text-white w-full">
+                            Enable Camera & Start Scanning
+                        </Button>
+                    </div>
+                ) : !scanResult ? (
+                    <div id="reader" className="w-full h-full" />
                 ) : (
-                    <div className={`p-8 flex flex-col items-center justify-center min-h-[300px] text-center ${scanResult.success ? 'bg-green-950/30' : 'bg-red-950/30'}`}>
+                    <div className={`p-8 flex flex-col items-center justify-center h-full text-center ${scanResult.success ? 'bg-green-950/20' : 'bg-red-950/20'}`}>
                         {scanResult.success ? (
                             <>
                                 <CheckCircle2 className="w-24 h-24 text-green-500 mb-4 animate-in zoom-in duration-300" />
@@ -93,15 +121,16 @@ export function QRScanner() {
                                 <p className="text-green-400 mb-6">{scanResult.message}</p>
 
                                 {scanResult.user && (
-                                    <div className="bg-neutral-900/80 p-6 rounded-xl border border-neutral-800 w-full animate-in slide-in-from-bottom duration-500">
-                                        <div className="text-neutral-400 text-sm uppercase tracking-wider mb-2">Identify</div>
+                                    <div className="bg-neutral-900/90 p-6 rounded-xl border border-neutral-800 w-full animate-in slide-in-from-bottom duration-500 shadow-xl">
+                                        <div className="text-neutral-500 text-xs uppercase tracking-wider mb-2">Member Identity</div>
                                         <div className="text-2xl font-bold text-white mb-1">{scanResult.user.username}</div>
-                                        <div className="flex items-center justify-center text-amber-500 font-mono">
+                                        <div className="flex items-center justify-center text-amber-500 font-mono mb-4">
                                             <Zap className="w-4 h-4 mr-1" />
                                             {scanResult.user.rank}
                                         </div>
-                                        <div className="mt-4 pt-4 border-t border-neutral-800">
-                                            <span className="text-green-400 font-bold">+50 XP</span> Awarded
+                                        <div className="pt-4 border-t border-neutral-800 flex justify-between items-center px-4">
+                                            <span className="text-neutral-400 text-sm">Reward</span>
+                                            <span className="text-green-400 font-bold font-mono text-lg">+50 XP</span>
                                         </div>
                                     </div>
                                 )}
@@ -119,6 +148,7 @@ export function QRScanner() {
                         </Button>
                     </div>
                 )}
+
                 {/* Overlay loading state */}
                 {isPending && !scanResult && (
                     <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-50">
@@ -130,7 +160,7 @@ export function QRScanner() {
                 )}
             </div>
 
-            {!scanResult && (
+            {permissionGranted && !scanResult && (
                 <div className="text-center text-neutral-500 text-sm">
                     Point camera at a Member Protocol Pass to verify access.
                 </div>
