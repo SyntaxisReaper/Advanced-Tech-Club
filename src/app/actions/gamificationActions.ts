@@ -104,6 +104,7 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
     else if (newXp >= 1000) newRank = "Node 🟢";
     else if (newXp >= 500) newRank = "Daemon 👻";
     else if (newXp >= 100) newRank = "Localhost 🏠";
+    else newRank = "Localhost 🏠"; // Catch-all for < 100 XP
 
     // Update Profile
     const { error: profileUpdateError } = await adminClient
@@ -114,6 +115,11 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
     if (profileUpdateError) {
         console.error("XP update error:", profileUpdateError);
         // We log it but don't fail the whole check-in since registration marked as checked-in
+        return {
+            success: true,
+            message: "Access Granted. (XP Update Failed: " + profileUpdateError.message + ")",
+            user: { username: currentProfile.username || "Unknown", xp: currentXp, rank: currentProfile.rank }
+        };
     }
 
     revalidatePath("/admin/registrations");
