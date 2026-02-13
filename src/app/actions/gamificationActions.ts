@@ -21,8 +21,14 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
 
     // 0. Verify Admin Access
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user || !(await isAdmin(user.email))) {
-        return { success: false, message: "Unauthorized: Admin Access Required." };
+
+    if (!user) {
+        return { success: false, message: "Unauthorized: Not Logged In." };
+    }
+
+    const adminEmail = user.email || "";
+    if (!(await isAdmin(adminEmail))) {
+        return { success: false, message: `Unauthorized: User ${adminEmail} is not an Admin.` };
     }
 
     // 1. Initialize Admin Client (Bypass RLS)
@@ -43,7 +49,10 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
 
     if (regError || !registration) {
         console.error("Registration lookup failed:", regError);
-        return { success: false, message: "Invalid Authorization Code." };
+        return {
+            success: false,
+            message: regError ? `DB Error: ${regError.message} (${regError.code})` : "Invalid Ticket: No registration found."
+        };
     }
 
     if (registration.checked_in) {
