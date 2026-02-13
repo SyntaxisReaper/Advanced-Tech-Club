@@ -35,15 +35,16 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
     // Ensure SUPABASE_SERVICE_ROLE_KEY is set in environment variables
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
         console.error("Missing SUPABASE_SERVICE_ROLE_KEY");
-        return { success: false, message: "Server Configuration Error." };
+        return { success: false, message: "Server Configuration Error: Missing Service Key." };
     }
 
     const adminClient = createAdminClient();
 
-    // 2. Verify Ticket using Admin Client
+    // 2. Verify Ticket using Admin Client (Split Query to avoid Relation Error)
+    // Fetch Registration ONLY
     const { data: registration, error: regError } = await adminClient
         .from("registrations")
-        .select("*, profiles:user_id (username, xp, rank)")
+        .select("*")
         .eq("ticket_secret", ticketSecret)
         .single();
 
@@ -51,18 +52,29 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
         console.error("Registration lookup failed:", regError);
         return {
             success: false,
-            message: regError ? `DB Error: ${regError.message} (${regError.code})` : "Invalid Ticket: No registration found."
+            message: regError ? `DB Error (Reg): ${regError.message} (${regError.code})` : "Invalid Ticket: No registration found."
         };
     }
 
+    // Fetch Profile ONLY
+    const { data: profile, error: profileFetchError } = await adminClient
+        .from("profiles")
+        .select("*")
+        .eq("id", registration.user_id)
+        .single();
+
+    // If profile missing, treat as default new user
+    const currentProfile = profile || { username: "Unknown", xp: 0, rank: "Script Kiddie" };
+
     if (registration.checked_in) {
-        // Already checked in, return success state but distinct message? 
-        // Or fail? "Already checked in" is a failure condition for *giving XP*.
         return {
-            success: false, // UI shows Red? Or Yellow? 
-            // Let's return false so scanner stops and shows message.
+            success: false,
             message: "User already checked in.",
-            user: registration.profiles
+            user: {
+                username: currentProfile.username,
+                xp: currentProfile.xp,
+                rank: currentProfile.rank
+            }
         };
     }
 
@@ -78,25 +90,25 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
     }
 
     // 4. Award XP and Update Rank
-    // Using adminClient bypasses RLS on profiles too
-    const currentXp = registration.profiles?.xp || 0;
+    const currentXp = currentProfile.xp || 0;
     const xpAward = 50;
     const newXp = currentXp + xpAward;
 
     // Rank Logic
-    let newRank = registration.profiles?.rank || "Script Kiddie";
+    let newRank = currentProfile.rank || "Script Kiddie";
     if (newXp >= 1000) newRank = "Neural Netrunner";
     else if (newXp >= 500) newRank = "Cyber Ninja";
     else if (newXp >= 200) newRank = "Code Breaker";
     else if (newXp >= 50) newRank = "Script Kiddie";
 
-    const { error: profileError } = await adminClient
+    // Update Profile
+    const { error: profileUpdateError } = await adminClient
         .from("profiles")
         .update({ xp: newXp, rank: newRank })
         .eq("id", registration.user_id);
 
-    if (profileError) {
-        console.error("XP update error:", profileError);
+    if (profileUpdateError) {
+        console.error("XP update error:", profileUpdateError);
         // We log it but don't fail the whole check-in since registration marked as checked-in
     }
 
@@ -107,7 +119,7 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
         success: true,
         message: "Access Granted. +50 XP",
         user: {
-            username: registration.profiles?.username || "Unknown",
+            username: currentProfile.username || "Unknown",
             xp: newXp,
             rank: newRank
         },
