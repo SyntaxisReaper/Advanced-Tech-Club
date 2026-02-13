@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAllEvents } from "@/services/eventService";
+import { getEvents } from "@/services/eventService";
 import { createClient } from "@/lib/supabase/server";
 
 async function getStats() {
@@ -20,7 +20,7 @@ async function getStats() {
 }
 
 export default async function AdminDashboard() {
-    const events = await getAllEvents();
+    const events = await getEvents();
     const stats = await getStats();
 
     const totalEvents = events.length;
