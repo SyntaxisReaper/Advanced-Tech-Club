@@ -4,13 +4,6 @@ import { useUser } from "@/hooks/useUser";
 import { getUserRegistrations, Registration } from "@/services/userService";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getEventBySlug } from "@/lib/mdx/mdxLoader"; // Note: accessing MDX loader from client component might fail if not careful, better to fetch metadata via API or use server component. 
-// Refactor: We need a server component or API to get event details by slug list.
-// For now, let's just list the slugs or creating a client-safe way.
-// Actually, mdxLoader uses 'fs' which is server-only.
-// We should make this page a Server Component or fetch data via server action/API.
-// Let's make it a Client Component calling a Server Action for fetching data.
-
 import { Loader2, Calendar, ArrowRight, Trophy, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -30,6 +23,8 @@ export default function DashboardPage() {
         }
         if (!loading && user) {
             fetchData();
+        } else if (!loading && !user) {
+            setLoadingRegs(false);
         }
     }, [user, loading]);
 
@@ -45,7 +40,7 @@ export default function DashboardPage() {
         <div className="space-y-8">
             <div>
                 <h1 className="text-3xl font-bold text-white">Welcome back, {user?.user_metadata?.full_name || 'Member'}</h1>
-                <p className="text-neutral-400 mt-2">Here's what's happening in your tech journey.</p>
+                <p className="text-neutral-400 mt-2">Here&apos;s what&apos;s happening in your tech journey.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -66,7 +61,7 @@ export default function DashboardPage() {
                     <Card className="bg-neutral-900 border-neutral-800">
                         <CardContent className="flex flex-col items-center justify-center py-12">
                             <Calendar className="h-12 w-12 text-neutral-600 mb-4" />
-                            <p className="text-neutral-400 text-lg mb-4">You haven't registered for any events yet.</p>
+                            <p className="text-neutral-400 text-lg mb-4">You haven&apos;t registered for any events yet.</p>
                             <Link href="/events">
                                 <Button variant="outline" className="border-indigo-500/50 text-indigo-400 hover:bg-neutral-800">
                                     Find an Event
@@ -103,8 +98,7 @@ function DashboardStat({ title, value, icon: Icon }: { title: string, value: str
 }
 
 function EventCard({ slug }: { slug: string }) {
-    // Determine title from slug for now since we can't access MDX easily from client without API
-    // A robust solution would retrieve event metadata via a server action or API route
+    // Determine title from slug using simple formatting for now
     const title = slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
     return (

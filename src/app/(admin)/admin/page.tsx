@@ -1,12 +1,31 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAllEvents } from "@/lib/mdx/mdxLoader";
-// import { getTotalRegistrations } from "@/services/eventService"; // To be implemented
+import { getAllEvents } from "@/services/eventService";
+import { createClient } from "@/lib/supabase/server";
+
+async function getStats() {
+    const supabase = await createClient();
+
+    const { count: registrationCount } = await supabase
+        .from("registrations")
+        .select("*", { count: "exact", head: true });
+
+    const { count: profileCount } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true });
+
+    return {
+        registrations: registrationCount || 0,
+        users: profileCount || 0
+    };
+}
 
 export default async function AdminDashboard() {
-    // Temporary placeholder stats until DB migration
-    const events = getAllEvents();
+    const events = await getAllEvents();
+    const stats = await getStats();
+
     const totalEvents = events.length;
-    const totalRegistrations = 0; // Placeholder
+    const totalRegistrations = stats.registrations;
+    const activeUsers = stats.users;
 
     return (
         <div className="space-y-8">
@@ -41,7 +60,7 @@ export default async function AdminDashboard() {
                         <CardTitle className="text-sm font-medium text-neutral-400">Active Users</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-white">-</div>
+                        <div className="text-2xl font-bold text-white">{activeUsers}</div>
                         <p className="text-xs text-neutral-500 mt-1">Registered members</p>
                     </CardContent>
                 </Card>
