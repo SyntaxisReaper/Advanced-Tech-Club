@@ -6,7 +6,7 @@ import { RemoveAdminButton } from "@/components/admin/RemoveAdminButton";
 import { createClient } from "@/lib/supabase/server";
 import { isSuperAdmin } from "@/lib/auth/admin";
 import { Badge } from "@/components/ui/badge";
-
+import { UserManagementTable } from "@/components/admin/UserManagementTable";
 export default async function AdminSettingsPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -82,11 +82,7 @@ export default async function AdminSettingsPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-sm text-neutral-400">
-                            User management interface coming soon. For now, please use Supabase Dashboard or SQL to manually edit user profiles if needed instantly.
-                            <br />
-                            A dedicated user search and edit tool will be implemented here.
-                        </div>
+                        <UserManagementTable />
                     </CardContent>
                 </Card>
             )}
