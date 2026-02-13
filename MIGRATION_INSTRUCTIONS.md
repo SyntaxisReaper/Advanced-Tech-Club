@@ -31,9 +31,9 @@ File: `supabase/migrations/20260213_create_admins_table.sql`
     Run the SQL in `supabase/migrations/20260213_fix_rls_recursion.sql` in the SQL Editor.
     **This fixes the "infinite loop" error that was likely blocking your access.**
 
-## Verification
-After running these scripts:
-1.  Go to your deployed site (or localhost).
+7.  **Gamification System (Profiles & Tickets):**
+    Run the SQL in `supabase/migrations/20260213_gamification_schema.sql` in the SQL Editor.
+    **This adds the XP, Rank, and Ticket functionality.**
 2.  Log in with `syntaxisreaper@gmail.com`.
 3.  Go to **Profile**.
 4.  You should see an **"Admin Dashboard"** button next to the title.
