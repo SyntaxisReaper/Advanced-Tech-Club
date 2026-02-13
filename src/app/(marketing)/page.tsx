@@ -3,24 +3,37 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Code, Trophy, Users } from "lucide-react";
 import { HeroButtons } from "@/components/marketing/HeroButtons";
 import { MotionFeatureCard } from "@/components/marketing/MotionFeatureCard";
+import { Hero3D } from "@/components/marketing/Hero3D";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
+
+
       {/* Hero Section */}
       <section className="relative py-20 md:py-32 overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6">
-            Build the <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">Future</span> with Us
-          </h1>
-          <p className="mt-4 text-xl text-neutral-400 max-w-2xl mx-auto mb-10">
-            Join the Advanced Tech Club to master coding, compete in global hackathons, and connect with the next generation of innovators.
-          </p>
-          <HeroButtons />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="text-center lg:text-left">
+              <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6">
+                Build the <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#9D4EDD] to-[#5A189A]">Future</span> with Us
+              </h1>
+              <p className="mt-4 text-xl text-neutral-400 mb-10 mx-auto lg:mx-0 max-w-2xl">
+                Join the Advanced Tech Club to master coding, compete in global hackathons, and connect with the next generation of innovators.
+              </p>
+              <HeroButtons />
+            </div>
+
+            {/* Right Visuals */}
+            <div className="relative z-10 flex justify-center lg:justify-end">
+              <Hero3D />
+            </div>
+          </div>
         </div>
       </section>
 

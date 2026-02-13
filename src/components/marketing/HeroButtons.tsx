@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 
 export function HeroButtons() {
     return (
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
             <Link href="/signup">
                 <motion.div
                     whileHover={{ scale: 1.05 }}
