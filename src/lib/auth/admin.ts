@@ -17,3 +17,7 @@ export async function isAdmin(email?: string | null) {
 
     return !!data;
 }
+export function isSuperAdmin(email?: string | null) {
+    if (!email) return false;
+    return ["syntaxisreaper@gmail.com"].includes(email.toLowerCase());
+}

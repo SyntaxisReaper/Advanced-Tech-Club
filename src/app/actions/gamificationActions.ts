@@ -64,7 +64,7 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
         .single();
 
     // If profile missing, treat as default new user
-    const currentProfile = profile || { username: "Unknown", xp: 0, rank: "Script Kiddie" };
+    const currentProfile = profile || { username: "Unknown", xp: 0, rank: "Localhost 🏠" };
 
     if (registration.checked_in) {
         return {
@@ -95,11 +95,15 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
     const newXp = currentXp + xpAward;
 
     // Rank Logic
-    let newRank = currentProfile.rank || "Script Kiddie";
-    if (newXp >= 1000) newRank = "Neural Netrunner";
-    else if (newXp >= 500) newRank = "Cyber Ninja";
-    else if (newXp >= 200) newRank = "Code Breaker";
-    else if (newXp >= 50) newRank = "Script Kiddie";
+    // Rank Logic
+    let newRank = currentProfile.rank || "Localhost 🏠"; // Default
+
+    // Thresholds
+    if (newXp >= 5000) newRank = "Singularity 🌌";
+    else if (newXp >= 2500) newRank = "Hypervisor 🏗️";
+    else if (newXp >= 1000) newRank = "Node 🟢";
+    else if (newXp >= 500) newRank = "Daemon 👻";
+    else if (newXp >= 100) newRank = "Localhost 🏠";
 
     // Update Profile
     const { error: profileUpdateError } = await adminClient
