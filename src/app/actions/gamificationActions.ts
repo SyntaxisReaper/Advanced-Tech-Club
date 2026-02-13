@@ -67,15 +67,19 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
     const currentProfile = profile || { username: "Unknown", xp: 0, rank: "Localhost 🏠" };
 
     if (registration.checked_in) {
-        return {
-            success: false,
-            message: "User already checked in.",
-            user: {
-                username: currentProfile.username,
-                xp: currentProfile.xp,
-                rank: currentProfile.rank
-            }
-        };
+        // RECOVERY: If user is checked in but has NO profile (null), allow proceeding to create it.
+        if (profile) {
+            return {
+                success: false,
+                message: "User already checked in.",
+                user: {
+                    username: currentProfile.username,
+                    xp: currentProfile.xp,
+                    rank: currentProfile.rank
+                }
+            };
+        }
+        // If !profile, fall through to award XP/create profile ("The Recovery Flow")
     }
 
     // 3. Perform Check-in
@@ -106,11 +110,17 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
     else if (newXp >= 100) newRank = "Localhost 🏠";
     else newRank = "Localhost 🏠"; // Catch-all for < 100 XP
 
-    // Update Profile
+    // Update/Insert Profile (Upsert to handle missing profiles for existing users)
     const { error: profileUpdateError } = await adminClient
         .from("profiles")
-        .update({ xp: newXp, rank: newRank })
-        .eq("id", registration.user_id);
+        .upsert({
+            id: registration.user_id,
+            username: currentProfile.username !== "Unknown" ? currentProfile.username : (user.user_metadata?.full_name || user.email?.split('@')[0] || "User"),
+            xp: newXp,
+            rank: newRank,
+            updated_at: new Date().toISOString()
+        })
+        .select();
 
     if (profileUpdateError) {
         console.error("XP update error:", profileUpdateError);
