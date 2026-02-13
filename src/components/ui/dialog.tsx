@@ -40,10 +40,11 @@ export const DialogTrigger = ({ children, asChild }: { children: React.ReactNode
 
     // Simple implementation of asChild logic: clone the child and add onClick
     if (asChild && React.isValidElement(children)) {
-        return React.cloneElement(children as React.ReactElement<any>, {
+        const child = children as React.ReactElement<any>;
+        return React.cloneElement(child, {
             onClick: (e: React.MouseEvent) => {
                 // Call original onClick if it exists
-                children.props.onClick?.(e);
+                child.props.onClick?.(e);
                 onOpenChange(true);
             }
         });
