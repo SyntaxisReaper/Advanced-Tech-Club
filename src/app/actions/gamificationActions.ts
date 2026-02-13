@@ -1,7 +1,9 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { isAdmin } from "@/lib/auth/admin";
 
 type CheckInResult = {
     success: boolean;
@@ -17,28 +19,46 @@ type CheckInResult = {
 export async function checkInUser(ticketSecret: string): Promise<CheckInResult> {
     const supabase = await createClient();
 
-    // 1. Verify Ticket
-    const { data: registration, error: regError } = await supabase
+    // 0. Verify Admin Access
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !(await isAdmin(user.email))) {
+        return { success: false, message: "Unauthorized: Admin Access Required." };
+    }
+
+    // 1. Initialize Admin Client (Bypass RLS)
+    // Ensure SUPABASE_SERVICE_ROLE_KEY is set in environment variables
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        console.error("Missing SUPABASE_SERVICE_ROLE_KEY");
+        return { success: false, message: "Server Configuration Error." };
+    }
+
+    const adminClient = createAdminClient();
+
+    // 2. Verify Ticket using Admin Client
+    const { data: registration, error: regError } = await adminClient
         .from("registrations")
         .select("*, profiles:user_id (username, xp, rank)")
         .eq("ticket_secret", ticketSecret)
         .single();
 
     if (regError || !registration) {
+        console.error("Registration lookup failed:", regError);
         return { success: false, message: "Invalid Authorization Code." };
     }
 
     if (registration.checked_in) {
+        // Already checked in, return success state but distinct message? 
+        // Or fail? "Already checked in" is a failure condition for *giving XP*.
         return {
-            success: false,
+            success: false, // UI shows Red? Or Yellow? 
+            // Let's return false so scanner stops and shows message.
             message: "User already checked in.",
             user: registration.profiles
         };
     }
 
-    // 2. Perform Check-in (Transaction-like via separate calls for now)
-    // Update Registration
-    const { error: updateError } = await supabase
+    // 3. Perform Check-in
+    const { error: updateError } = await adminClient
         .from("registrations")
         .update({ checked_in: true, checked_in_at: new Date().toISOString() })
         .eq("id", registration.id);
@@ -48,26 +68,27 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
         return { success: false, message: "System Error: Could not update status." };
     }
 
-    // 3. Award XP and Update Rank
+    // 4. Award XP and Update Rank
+    // Using adminClient bypasses RLS on profiles too
     const currentXp = registration.profiles?.xp || 0;
     const xpAward = 50;
     const newXp = currentXp + xpAward;
 
-    // Simple Rank Logic
+    // Rank Logic
     let newRank = registration.profiles?.rank || "Script Kiddie";
     if (newXp >= 1000) newRank = "Neural Netrunner";
     else if (newXp >= 500) newRank = "Cyber Ninja";
     else if (newXp >= 200) newRank = "Code Breaker";
-    else if (newXp >= 50) newRank = "Script Kiddie"; // Initial rank
+    else if (newXp >= 50) newRank = "Script Kiddie";
 
-    const { error: profileError } = await supabase
+    const { error: profileError } = await adminClient
         .from("profiles")
         .update({ xp: newXp, rank: newRank })
         .eq("id", registration.user_id);
 
     if (profileError) {
         console.error("XP update error:", profileError);
-        // Note: Check-in succeeded but XP failed. Ideally this should be a transaction.
+        // We log it but don't fail the whole check-in since registration marked as checked-in
     }
 
     revalidatePath("/admin/registrations");
