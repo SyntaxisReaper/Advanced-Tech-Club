@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { UserData, updateUserStats } from "@/app/actions/userManagementActions";
 import { Pencil, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner"; // Assuming sonner is installed, or we can use another method or just console log/alert
+
 
 interface EditUserDialogProps {
     user: UserData;
@@ -44,7 +44,7 @@ export function EditUserDialog({ user }: EditUserDialogProps) {
                 setOpen(false);
                 // toast.success("User updated!");
             } else {
-                // toast.error(result.message);
+                console.error(result.message);
                 alert(result.message);
             }
         });
