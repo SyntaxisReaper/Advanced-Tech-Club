@@ -110,12 +110,24 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
     else if (newXp >= 100) newRank = "Localhost 🏠";
     else newRank = "Localhost 🏠"; // Catch-all for < 100 XP
 
+    // Generate a username from registration data if profile is missing
+    let finalUsername = currentProfile.username;
+    if (finalUsername === "Unknown") {
+        // Use full name or email prefix, fallback to "User"
+        // Also append a random 4-digit string to ensure uniqueness and avoid conflicts
+        const baseName = registration.full_name || registration.email?.split('@')[0] || "User";
+        // Clean username: remove spaces, special chars
+        const cleanName = baseName.replace(/[^a-zA-Z0-9]/g, "");
+        const randomSuffix = Math.floor(1000 + Math.random() * 9000).toString();
+        finalUsername = `${cleanName}${randomSuffix}`;
+    }
+
     // Update/Insert Profile (Upsert to handle missing profiles for existing users)
     const { error: profileUpdateError } = await adminClient
         .from("profiles")
         .upsert({
             id: registration.user_id,
-            username: currentProfile.username !== "Unknown" ? currentProfile.username : (user.user_metadata?.full_name || user.email?.split('@')[0] || "User"),
+            username: finalUsername,
             xp: newXp,
             rank: newRank,
             updated_at: new Date().toISOString()
@@ -124,11 +136,13 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
 
     if (profileUpdateError) {
         console.error("XP update error:", profileUpdateError);
-        // We log it but don't fail the whole check-in since registration marked as checked-in
+        // If username conflict still happens, we could retry, but for now just log it.
+        // Recovery: If username taken, maybe try one more time with new random suffix?
+        // Simple retry logic can be added later if needed.
         return {
             success: true,
             message: "Access Granted. (XP Update Failed: " + profileUpdateError.message + ")",
-            user: { username: currentProfile.username || "Unknown", xp: currentXp, rank: currentProfile.rank }
+            user: { username: finalUsername, xp: currentXp, rank: currentProfile.rank }
         };
     }
 
@@ -139,7 +153,7 @@ export async function checkInUser(ticketSecret: string): Promise<CheckInResult> 
         success: true,
         message: "Access Granted. +50 XP",
         user: {
-            username: currentProfile.username || "Unknown",
+            username: finalUsername,
             xp: newXp,
             rank: newRank
         },
