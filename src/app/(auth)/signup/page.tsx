@@ -63,7 +63,7 @@ export default function SignupPage() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-neutral-950 px-4 py-12 sm:px-6 lg:px-8">
+        <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
             <div className="w-full max-w-md space-y-8">
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-white">
@@ -71,13 +71,13 @@ export default function SignupPage() {
                     </h2>
                     <p className="mt-2 text-center text-sm text-neutral-400">
                         Or{" "}
-                        <Link href="/login" className="font-medium text-indigo-500 hover:text-indigo-400">
+                        <Link href="/login" className="font-medium text-[#9D4EDD] hover:text-[#5A189A]">
                             sign in to your existing account
                         </Link>
                     </p>
                 </div>
 
-                <div className="bg-neutral-900 px-6 py-8 shadow rounded-lg sm:px-10 border border-neutral-800">
+                <div className="bg-[#474B4F]/80 backdrop-blur-md px-6 py-8 shadow rounded-lg sm:px-10 border border-neutral-700/50">
                     <form action={async (formData) => { await loginWithGoogle(formData); }} className="mb-6">
                         <Button type="submit" className="w-full bg-white text-black hover:bg-neutral-200 border-0">
                             <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">

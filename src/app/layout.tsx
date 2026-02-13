@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"; // Changing font to Inter as per desig
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { BackgroundNetwork } from "@/components/ui/background-network";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,9 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-neutral-950 text-neutral-50 antialiased min-h-screen flex flex-col`}>
+      <body className={`${inter.className} text-foreground bg-transparent antialiased min-h-screen flex flex-col relative overflow-x-hidden`}>
+        <BackgroundNetwork />
         <Navbar />
-        <main className="flex-grow pt-16">
+        <main className="flex-grow pt-16 relative z-10">
           {children}
         </main>
         <Footer />

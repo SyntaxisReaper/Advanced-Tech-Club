@@ -21,13 +21,13 @@ export function Navbar() {
     const isActive = (path: string) => pathname?.startsWith(path);
 
     return (
-        <nav className="fixed top-0 w-full z-50 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800">
+        <nav className="fixed top-0 w-full z-50 bg-transparent backdrop-blur-md border-b border-[#9D4EDD]/30">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center space-x-2">
-                            <Terminal className="h-8 w-8 text-indigo-500" />
-                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">
+                            <Terminal className="h-8 w-8 text-[#9D4EDD]" />
+                            <span className="text-xl font-bold text-white tracking-tight">
                                 Advanced Tech Club
                             </span>
                         </Link>

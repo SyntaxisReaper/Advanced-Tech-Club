@@ -1,0 +1,23 @@
+
+> tech-club-platform@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.4s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+Error: supabaseUrl is required.
+    at <unknown> (C:\Users\Public\New folder\Advanced-Tech-Club-main\Advanced-Tech-Club-main\.next\server\chunks\ssr\_23f323c5._.js:40:43440)
+    at new cq (C:\Users\Public\New folder\Advanced-Tech-Club-main\Advanced-Tech-Club-main\.next\server\chunks\ssr\_23f323c5._.js:40:43691)
+    at cr (C:\Users\Public\New folder\Advanced-Tech-Club-main\Advanced-Tech-Club-main\.next\server\chunks\ssr\_23f323c5._.js:40:47633)
+    at d (C:\Users\Public\New folder\Advanced-Tech-Club-main\Advanced-Tech-Club-main\.next\server\chunks\ssr\[root-of-the-server]__149b510d._.js:1:399)
+    at Object.r [as generateStaticParams] (C:\Users\Public\New folder\Advanced-Tech-Club-main\Advanced-Tech-Club-main\.next\server\chunks\ssr\[root-of-the-server]__149b510d._.js:1:11081)
+
+> Build error occurred
+Error: Failed to collect page data for /events/[slug]
+    at ignore-listed frames {
+  type: 'Error'
+}

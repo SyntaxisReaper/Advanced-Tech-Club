@@ -16,7 +16,7 @@ export default async function EventsPage() {
     const events = await getEvents();
 
     return (
-        <div className="min-h-screen bg-neutral-950 py-12">
+        <div className="min-h-screen py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold text-white mb-4">Upcoming Events</h1>
@@ -27,7 +27,7 @@ export default async function EventsPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {events.map((event) => (
-                        <Card key={event.slug} className="bg-neutral-900 border-neutral-800 text-neutral-200 hover:border-indigo-500/50 transition-colors duration-300">
+                        <Card key={event.slug} className="bg-[#474B4F]/80 backdrop-blur-md border-neutral-700/50 text-neutral-200 hover:border-[#9D4EDD]/50 transition-colors duration-300">
                             <CardHeader>
                                 <div className="flex justify-between items-start mb-2">
                                     <Badge variant="outline" className="text-indigo-400 border-indigo-500/30">
