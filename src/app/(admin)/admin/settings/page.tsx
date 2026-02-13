@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield } from "lucide-react";
+import { Shield, User } from "lucide-react";
 import { getAdmins } from "@/services/adminService";
 import { AddAdminForm } from "@/components/admin/AddAdminForm";
 import { RemoveAdminButton } from "@/components/admin/RemoveAdminButton";
