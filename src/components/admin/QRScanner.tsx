@@ -52,7 +52,10 @@ export function QRScanner() {
                         fps: 10,
                         qrbox: { width: 250, height: 250 },
                         aspectRatio: 1.0,
-                        showTorchButtonIfSupported: true
+                        showTorchButtonIfSupported: true,
+                        videoConstraints: {
+                            facingMode: "environment"
+                        }
                     },
                     /* verbose= */ false
                 );
@@ -60,7 +63,7 @@ export function QRScanner() {
                 scanner.render(onScanSuccess, onScanFailure);
                 scannerRef.current = scanner;
             }
-        }, 100);
+        }, 300); // Increased timeout slightly
     };
 
     function onScanSuccess(decodedText: string) {
