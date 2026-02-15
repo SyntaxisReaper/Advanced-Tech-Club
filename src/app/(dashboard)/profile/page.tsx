@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProtocolPass } from "@/components/events/ProtocolPass";
+import { DeleteAccountSection } from "@/components/profile/DeleteAccountSection";
 
 interface ExtendedRegistration extends Registration {
     eventTitle: string;
