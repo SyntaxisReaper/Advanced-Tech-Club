@@ -6,7 +6,12 @@ import { MotionFeatureCard } from "@/components/marketing/MotionFeatureCard";
 import { HeroGlobe } from "@/components/marketing/HeroGlobe";
 import { Leaderboard } from "@/components/marketing/Leaderboard";
 
-export default function Home() {
+import { createClient } from "@/lib/supabase/server";
+
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <div className="flex flex-col min-h-screen">
 
@@ -65,9 +70,11 @@ export default function Home() {
       </section>
 
       {/* Leaderboard Section */}
-      <section className="py-20 bg-neutral-900/30">
-        <Leaderboard />
-      </section>
+      {user && (
+        <section className="py-20 bg-neutral-900/30">
+          <Leaderboard />
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="py-20">

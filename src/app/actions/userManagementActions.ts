@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { isAdmin } from "@/lib/auth/admin";
+import { logAuditAction } from "@/lib/auditService";
 
 export type UserData = {
     id: string;
@@ -195,5 +196,36 @@ export async function deleteUser(userId: string) {
     }
 
     revalidatePath("/admin/settings");
+
+    // Log the action
+    await logAuditAction("DELETE_USER_BY_ADMIN", { target_user_id: userId }, user.id);
+
     return { success: true, message: "User deleted successfully" };
+}
+
+export async function deleteMyAccount() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    const adminClient = createAdminClient();
+    const userId = user.id;
+
+    // 1. Delete from Auth (cascades)
+    const { error: authError } = await adminClient.auth.admin.deleteUser(userId);
+
+    if (authError) {
+        console.error("Error deleting own account:", authError);
+        return { success: false, message: "Failed to delete account: " + authError.message };
+    }
+
+    // 2. Manual cleanup if needed (profiles/registrations) - relying on cascade or adminClient as above is fine.
+
+    await logAuditAction("USER_SELF_DELETE", { deleted_user_id: userId, email: user.email }, undefined);
+    // passing undefined for userId so it doesn't violate FK constraint after user is gone.
+
+    return { success: true, message: "Account deleted successfully" };
 }
