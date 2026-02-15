@@ -110,9 +110,20 @@ export async function updateUserStats(userId: string, newRank: string, newXp: nu
 
     const adminClient = createAdminClient();
 
+    // "Killer" Rank Logic
+    // If the rank is "Killer", automatic max XP
+    let finalXp = newXp;
+    let finalRank = newRank;
+
+    // Check if the user being updated is the owner (optional security, but good practice)
+    // Or if the rank being set is "Killer"
+    if (newRank === "Killer") {
+        finalXp = 999999; // Maximize XP
+    }
+
     const { error } = await adminClient
         .from("profiles")
-        .update({ rank: newRank, xp: newXp, updated_at: new Date().toISOString() })
+        .update({ rank: finalRank, xp: finalXp, updated_at: new Date().toISOString() })
         .eq("id", userId);
 
     if (error) {
@@ -120,8 +131,69 @@ export async function updateUserStats(userId: string, newRank: string, newXp: nu
         return { success: false, message: "Update Failed: " + error.message };
     }
 
-    revalidatePath("/admin/settings");
     revalidatePath("/profile");
 
     return { success: true, message: "User updated successfully" };
+}
+
+export async function getLeaderboard(): Promise<{ success: boolean; leaderboard?: { username: string; xp: number; rank: string }[] }> {
+    const supabase = await createClient(); // Use standard client, public data usually
+    // Or use admin client if RLS hides it, but public profiles should be visible.
+    // Let's use createClient for now, assuming public read access policy exists or we add one.
+    // Re-checking schema: "Public profiles are viewable by everyone" policy exists. Good.
+
+    const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("username, xp, rank")
+        .order("xp", { ascending: false })
+        .limit(10);
+
+    if (error) {
+        console.error("Error fetching leaderboard:", error);
+        return { success: false };
+    }
+
+    return { success: true, leaderboard: profiles || [] };
+}
+
+export async function deleteUser(userId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user || !(await isAdmin(user.email || ""))) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    const adminClient = createAdminClient();
+
+    // 1. Delete from Auth (this cascades to profiles if set up, but let's be safe)
+    const { error: authError } = await adminClient.auth.admin.deleteUser(userId);
+
+    if (authError) {
+        console.error("Error deleting user from auth:", authError);
+        return { success: false, message: "Failed to delete from Auth: " + authError.message };
+    }
+
+    // 2. Delete from Profiles (Manual cleanup if cascade missing)
+    const { error: profileError } = await adminClient
+        .from("profiles")
+        .delete()
+        .eq("id", userId);
+
+    if (profileError) {
+        console.warn("Error deleting profile (might already be gone via cascade):", profileError);
+    }
+
+    // 3. Delete Registrations (Manual cleanup if cascade missing)
+    const { error: regError } = await adminClient
+        .from("registrations")
+        .delete()
+        .eq("user_id", userId);
+
+    if (regError) {
+        console.warn("Error deleting registrations (might already be gone via cascade):", regError);
+    }
+
+    revalidatePath("/admin/settings");
+    return { success: true, message: "User deleted successfully" };
 }

@@ -4,6 +4,7 @@ import { ArrowRight, Code, Trophy, Users } from "lucide-react";
 import { HeroButtons } from "@/components/marketing/HeroButtons";
 import { MotionFeatureCard } from "@/components/marketing/MotionFeatureCard";
 import { HeroGlobe } from "@/components/marketing/HeroGlobe";
+import { Leaderboard } from "@/components/marketing/Leaderboard";
 
 export default function Home() {
   return (
@@ -61,6 +62,11 @@ export default function Home() {
             />
           </div>
         </div>
+      </section>
+
+      {/* Leaderboard Section */}
+      <section className="py-20 bg-neutral-900/30">
+        <Leaderboard />
       </section>
 
       {/* CTA Section */}

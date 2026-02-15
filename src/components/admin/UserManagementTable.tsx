@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { EditUserDialog } from "./EditUserDialog";
+import { DeleteUserButton } from "./DeleteUserButton";
 import { Search, Loader2 } from "lucide-react";
 
 export function UserManagementTable() {
@@ -99,8 +100,9 @@ export function UserManagementTable() {
                                     <TableCell className="text-right text-white font-mono">
                                         {user.xp}
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="flex justify-end gap-2">
                                         <EditUserDialog user={user} />
+                                        <DeleteUserButton userId={user.id} username={user.username} />
                                     </TableCell>
                                 </TableRow>
                             ))
